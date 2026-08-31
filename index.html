@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Digital Lab Studios</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,400;1,500;1,600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter', sans-serif; background:#000; }
+  .font-playfair { font-family:'Playfair Display', serif; }
+
+  section.hero {
+    position:relative; width:100%; height:100vh; height:100dvh;
+    overflow:hidden; background:#000; touch-action:none;
+  }
+  .layer { position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat; }
+  #baseImg { z-index:10; animation: heroZoom 1.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+  #revealWrap { position:absolute; inset:0; z-index:30; overflow:hidden; pointer-events:none; }
+  #revealImg { position:absolute; inset:0; background-size:cover; background-position:center; background-repeat:no-repeat; width:100%; height:100%; }
+  .overlay { position:absolute; inset:0; z-index:20; background:#000; opacity:0.25; }
+
+  nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:16px 20px; }
+  .logo { display:flex; align-items:center; gap:8px; }
+  .logo span { color:#fff; font-size:1.4rem; }
+  .navPill { display:none; position:absolute; left:50%; transform:translateX(-50%); background:rgba(255,255,255,.15); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:8px; gap:4px; }
+  .navPill button { background:none; border:none; color:rgba(255,255,255,.8); font-size:.9rem; font-weight:500; padding:6px 16px; border-radius:999px; cursor:pointer; }
+  .navPill button.active { background:rgba(255,255,255,.18); color:#fff; }
+  .ctaTop { display:none; background:#fff; color:#111; font-size:.9rem; font-weight:600; padding:10px 24px; border-radius:999px; text-decoration:none; }
+  @media (min-width:768px){ .navPill{display:flex;} .ctaTop{display:block;} }
+
+  .heading { position:absolute; top:16%; left:0; right:0; display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 20px; pointer-events:none; z-index:50; }
+  .heading h1 { color:#fff; line-height:.95; }
+  .heading .line1 { display:block; font-style:italic; font-weight:400; font-size:3rem; letter-spacing:-.03em; opacity:0; animation: heroReveal 1.1s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:.25s; }
+  .heading .line2 { display:block; font-weight:400; font-size:3rem; letter-spacing:-.04em; margin-top:-4px; opacity:0; animation: heroReveal 1.1s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:.42s; }
+  @media (min-width:768px){ .heading .line1,.heading .line2{ font-size:5rem; } }
+
+  .bottomLeft { display:none; position:absolute; bottom:56px; left:56px; max-width:260px; z-index:50; opacity:0; animation: heroFade 1s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:.7s; }
+  .bottomLeft p { color:rgba(255,255,255,.8); font-size:.9rem; line-height:1.5; }
+  @media (min-width:640px){ .bottomLeft{ display:block; } }
+
+  .bottomRight { position:absolute; bottom:40px; left:20px; right:20px; z-index:50; display:flex; flex-direction:column; align-items:flex-start; gap:16px; opacity:0; animation: heroFade 1s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:.85s; }
+  .bottomRight p { color:rgba(255,255,255,.8); font-size:.8rem; line-height:1.5; }
+  .cta { background:#E8702A; color:#fff; font-size:.9rem; font-weight:500; padding:12px 28px; border-radius:999px; text-decoration:none; transition:.2s; }
+  .cta:hover { background:#D2611F; transform:scale(1.03); }
+  @media (min-width:640px){ .bottomRight{ bottom:96px; left:auto; right:56px; max-width:260px; } }
+
+  .touchHint { position:absolute; top:58%; left:0; right:0; display:flex; justify-content:center; z-index:50; pointer-events:none; opacity:0; animation: heroFade 1s cubic-bezier(0.16,1,0.3,1) forwards; animation-delay:1.1s; }
+  .touchHint span { color:rgba(255,255,255,.6); font-size:.75rem; letter-spacing:.05em; text-transform:uppercase; }
+  @media (min-width:640px){ .touchHint{ display:none; } }
+
+  @keyframes heroReveal { 0%{opacity:0; transform:translateY(28px); filter:blur(12px);} 100%{opacity:1; transform:translateY(0); filter:blur(0);} }
+  @keyframes heroFade { 0%{opacity:0; transform:translateY(20px);} 100%{opacity:1; transform:translateY(0);} }
+  @keyframes heroZoom { 0%{transform:scale(1.12);} 100%{transform:scale(1);} }
+  @media (prefers-reduced-motion: reduce){ *{ animation:none !important; opacity:1 !important; } }
+</style>
+</head>
+<body>
+
+<section class="hero" id="heroSection">
+  <div class="layer" id="baseImg"></div>
+  <div id="revealWrap"><div id="revealImg"></div></div>
+  <canvas id="maskCanvas" style="display:none;"></canvas>
+  <div class="overlay"></div>
+
+  <nav>
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 256 256" fill="none">
+        <path d="M40 176 L216 176 L216 196 L40 196 Z" fill="#ffffff"/>
+        <path d="M72 176 L72 150 Q72 130 100 130 L156 130 Q184 130 184 150 L184 176 Z" fill="#ffffff"/>
+        <rect x="118" y="196" width="20" height="40" fill="#ffffff"/>
+        <path d="M128 20 L138 52 L128 44 L118 52 Z" fill="#E8702A"/>
+        <path d="M160 36 L166 58 L156 54 L150 62 Z" fill="#E8702A"/>
+      </svg>
+      <span class="font-playfair" style="font-style:italic;">Digital Lab Studios</span>
+    </div>
+    <div class="navPill">
+      <button class="active">Servizi</button>
+      <button>Chi siamo</button>
+      <button>Portfolio</button>
+      <button>Contatti</button>
+    </div>
+    <a class="ctaTop" href="https://wa.me/390000000000" target="_blank" rel="noreferrer">Scrivici</a>
+  </nav>
+
+  <div class="heading">
+    <h1>
+      <span class="line1 font-playfair">Si forgia qui</span>
+      <span class="line2">il tuo digitale</span>
+    </h1>
+  </div>
+
+  <div class="bottomLeft">
+    <p>Ogni sito, ogni contenuto, ogni automazione nasce grezza e viene forgiata su misura, pezzo dopo pezzo.</p>
+  </div>
+
+  <div class="bottomRight">
+    <p>Creiamo siti, gestiamo i tuoi social e costruiamo contenuti e automazioni per far crescere la tua attività, senza fronzoli.</p>
+    <a class="cta" href="https://wa.me/390000000000" target="_blank" rel="noreferrer">Parliamone su WhatsApp</a>
+  </div>
+
+  <div class="touchHint"><span>Trascina il dito qui</span></div>
+</section>
+
+<script>
+  // Real forge photos, generated for Digital Lab Studios
+  var BG_IMAGE_1 = "https://d8j0ntlcm91z4.cloudfront.net/user_3GaV1tebp6ZdOud63ROO5FRDuUT/hf_20260830_123312_e6cf8704-6d02-4f0c-bc58-44413f59d3ec.png";
+  var BG_IMAGE_2 = "https://d8j0ntlcm91z4.cloudfront.net/user_3GaV1tebp6ZdOud63ROO5FRDuUT/hf_20260830_123630_7d0f2e0e-9277-4a26-b3e9-774598da5247.png";
+
+  document.getElementById('baseImg').style.backgroundImage = "url('" + BG_IMAGE_1 + "')";
+  document.getElementById('revealImg').style.backgroundImage = "url('" + BG_IMAGE_2 + "')";
+
+  var SPOTLIGHT_R = 260;
+  var canvas = document.getElementById('maskCanvas');
+  var ctx = canvas.getContext('2d');
+  var revealWrap = document.getElementById('revealWrap');
+
+  var mouse = { x: -999, y: -999 };
+  var smooth = { x: -999, y: -999 };
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawMask(x, y) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var gradient = ctx.createRadialGradient(x, y, 0, x, y, SPOTLIGHT_R);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.4, 'rgba(255,255,255,1)');
+    gradient.addColorStop(0.6, 'rgba(255,255,255,0.75)');
+    gradient.addColorStop(0.75, 'rgba(255,255,255,0.4)');
+    gradient.addColorStop(0.88, 'rgba(255,255,255,0.12)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, SPOTLIGHT_R, 0, Math.PI * 2);
+    ctx.fill();
+    var dataUrl = canvas.toDataURL();
+    revealWrap.style.webkitMaskImage = "url(" + dataUrl + ")";
+    revealWrap.style.maskImage = "url(" + dataUrl + ")";
+    revealWrap.style.webkitMaskSize = "100% 100%";
+    revealWrap.style.maskSize = "100% 100%";
+  }
+
+  function loop() {
+    smooth.x += (mouse.x - smooth.x) * 0.1;
+    smooth.y += (mouse.y - smooth.y) * 0.1;
+    drawMask(smooth.x, smooth.y);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  window.addEventListener('mousemove', function(e){
+    mouse.x = e.clientX; mouse.y = e.clientY;
+  });
+
+  var hero = document.getElementById('heroSection');
+  hero.addEventListener('touchstart', handleTouch, { passive: false });
+  hero.addEventListener('touchmove', handleTouch, { passive: false });
+  hero.addEventListener('touchend', function(){ mouse.x = -999; mouse.y = -999; });
+  hero.addEventListener('touchcancel', function(){ mouse.x = -999; mouse.y = -999; });
+
+  function handleTouch(e) {
+    if (!e.touches || e.touches.length === 0) return;
+    e.preventDefault();
+    mouse.x = e.touches[0].clientX;
+    mouse.y = e.touches[0].clientY;
+  }
+
+  document.querySelectorAll('.navPill button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.navPill button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
